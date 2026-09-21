@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Health Dashboard</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: #f4f6fb;
+      color: #2b2d42;
+    }
+    header {
+      background: #1e2761;
+      color: white;
+      padding: 28px 40px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .subtitle {
+      color: #cadcfc;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 40px;
+    }
+    .upload-section {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .upload-input {
+      padding: 24px 12px;
+      border: 2px dashed #cadcfc;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      color: #8d99ae;
+      font-size: 14px;
+    }
+    .upload-input:hover {
+      border-color: #1e2761;
+      background: #f4f6fb;
+    }
+    .upload-input.drag-active {
+      border-color: #1e2761;
+      background: #e9f7ef;
+      border-style: solid;
+    }
+    .upload-button {
+      background: #1e2761;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+    .upload-button:hover {
+      background: #151b4b;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .stat-box {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .stat-num {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #8d99ae;
+      text-transform: uppercase;
+      margin-top: 8px;
+      letter-spacing: 0.4px;
+    }
+    .stat-box.green .stat-num { color: #27ae60; }
+    .stat-box.yellow .stat-num { color: #e67e22; }
+    .stat-box.red .stat-num { color: #c0392b; }
+    .stat-box.total .stat-num { color: #1e2761; }
+    .section-label {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #8d99ae;
+      font-weight: 700;
+      margin: 36px 0 14px;
+      border-bottom: 2px solid #cadcfc;
+      padding-bottom: 8px;
+    }
+    .section-label:first-child { margin-top: 0; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .project-card {
+      background: white;
+      border-radius: 8px;
+      padding: 16px 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-left: 5px solid #8d99ae;
+    }
+    .project-card.red { border-left-color: #c0392b; background: linear-gradient(to right, #fdecea 0%, white 6%); }
+    .project-card.yellow { border-left-color: #e67e22; background: linear-gradient(to right, #fef9ec 0%, white 6%); }
+    .card-account {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1e2761;
+    }
+    .card-project {
+      font-size: 12.5px;
+      color: #555555;
+      margin-top: 2px;
+    }
+    .card-meta {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px;
+      font-size: 12.5px;
+      flex-wrap: wrap;
+    }
+    .meta-label {
+      color: #8d99ae;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      margin-right: 3px;
+      letter-spacing: 0.3px;
+    }
+    .status-tiles {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .status-tile {
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      min-width: 60px;
+      text-align: center;
+    }
+    .margin-block {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      background: #f4f6fb;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .margin-cell {
+      flex: 1;
+      min-width: 0;
+    }
+    .margin-cell-label {
+      font-size: 9.5px;
+      color: #8d99ae;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .margin-cell-val {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .trends-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .chart-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chart-card h3 {
+      margin: 0 0 16px;
+      font-size: 14px;
+      color: #1e2761;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #8d99ae;
+    }
+    .error {
+      background: #fdecea;
+      color: #c0392b;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      border-left: 4px solid #c0392b;
+    }
+    .success {
+      background: #e9f7ef;
+      color: #27ae60;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      border-left: 4px solid #27ae60;
+    }
+    @media (max-width: 900px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .trends-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Project Health Dashboard</h1>
+    <div class="subtitle">Weekly delivery status and trend analysis</div>
+  </header>
+  <div id="root"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
