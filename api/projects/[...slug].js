@@ -25,8 +25,8 @@ module.exports = async (req, res) => {
   try {
     await initDb();
 
-    // Route: GET /api/projects (list all projects for PM)
-    if (path === '' && req.method === 'GET') {
+    // Route: GET /api/projects or GET /api/projects/list (list all projects for PM)
+    if ((path === '' || path === 'list') && req.method === 'GET') {
       return handleListProjects(req, res, pmEmail, client);
     }
 
