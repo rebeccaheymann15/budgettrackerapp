@@ -4,7 +4,6 @@
   "description": "Project Health Dashboard",
   "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
     "dev": "node server/server.js"
   },
   "repository": {
